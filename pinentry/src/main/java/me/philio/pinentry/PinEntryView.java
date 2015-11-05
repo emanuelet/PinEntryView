@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -136,14 +137,14 @@ public class PinEntryView extends ViewGroup {
         TypedValue textColor = new TypedValue();
         theme.resolveAttribute(android.R.attr.textColorPrimary, textColor, true);
         mDigitTextColor = array.getColor(R.styleable.PinEntryView_digitTextColor,
-                textColor.resourceId > 0 ? getResources().getColor(textColor.resourceId) :
+                textColor.resourceId > 0 ? ContextCompat.getColor(context,textColor.resourceId) :
                         textColor.data);
 
         // Accent colour, default to android:colorAccent from theme
         TypedValue accentColor = new TypedValue();
         theme.resolveAttribute(R.attr.colorAccent, accentColor, true);
         mAccentColor = array.getColor(R.styleable.PinEntryView_pinAccentColor,
-                accentColor.resourceId > 0 ? getResources().getColor(accentColor.resourceId) :
+                accentColor.resourceId > 0 ? ContextCompat.getColor(context, accentColor.resourceId) :
                         accentColor.data);
 
         // Mask character
@@ -313,8 +314,8 @@ public class PinEntryView extends ViewGroup {
 
         // Add an "invisible" edit text to handle input
         mEditText = new EditText(getContext());
-        mEditText.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        mEditText.setTextColor(getResources().getColor(android.R.color.transparent));
+        mEditText.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        mEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
         mEditText.setCursorVisible(false);
         mEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(mDigits)});
         mEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
