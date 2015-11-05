@@ -92,6 +92,17 @@ public class PinEntryView extends ViewGroup {
      */
     private OnFocusChangeListener mOnFocusChangeListener;
 
+    /**
+     * If set to false, will always draw accent color if type is CHARACTER or ALL
+     * If set to true, will draw accent color only when focussed.
+     */
+    private boolean mAccentRequiresFocus;
+
+    /**
+     * Pin entered listener used as a callback for when all digits have been entered
+     */
+    private PinEnteredListener mPinEnteredListener;
+
     public PinEntryView(Context context) {
         this(context, null);
     }
@@ -153,6 +164,8 @@ public class PinEntryView extends ViewGroup {
             mMask = maskCharacter;
         }
 
+        mAccentRequiresFocus = array.getBoolean(R.styleable.PinEntryView_accentRequiresFocus, true);
+
         // Recycle the typed array
         array.recycle();
 
@@ -168,7 +181,7 @@ public class PinEntryView extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // Measure children
-        for (int i = 0; i < getChildCount(); i ++) {
+        for (int i = 0; i < getChildCount(); i++) {
             getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
         }
 
@@ -292,6 +305,10 @@ public class PinEntryView extends ViewGroup {
 	    }
 	}
 
+    public void setPinEnteredListener(PinEnteredListener mPinEnteredListener) {
+        this.mPinEnteredListener = mPinEnteredListener;
+    }
+
     /**
      * Create views and add them to the view group
      */
@@ -320,6 +337,7 @@ public class PinEntryView extends ViewGroup {
         mEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(mDigits)});
         mEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
         mEditText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+        mEditText.setPadding(mEditText.getPaddingLeft(), mEditText.getPaddingTop(), mEditText.getPaddingRight(), 100);
         mEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -366,6 +384,10 @@ public class PinEntryView extends ViewGroup {
                                         (i == mDigits - 1 && length == mDigits))));
                     }
                 }
+
+                if (length == mDigits && mPinEnteredListener != null) {
+                    mPinEnteredListener.pinEntered(s.toString());
+                }
             }
         });
         addView(mEditText);
@@ -407,6 +429,10 @@ public class PinEntryView extends ViewGroup {
 
     }
 
+    public interface PinEnteredListener {
+        void pinEntered(String pin);
+    }
+
     /**
      * Custom text view that adds a coloured accent when selected
      */
@@ -439,7 +465,7 @@ public class PinEntryView extends ViewGroup {
             super.onDraw(canvas);
 
             // If selected draw the accent
-            if (isSelected()) {
+            if (isSelected() || !mAccentRequiresFocus) {
                 canvas.drawRect(0, getHeight() - mAccentWidth, getWidth(), getHeight(), mPaint);
             }
         }
